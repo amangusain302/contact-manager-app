@@ -4,7 +4,6 @@ import { FaUserCircle } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 
 export default function ContactCard({ data, onOpen, getContactId, deleteContact }) {
-
   const onOpenEditHandler = (id) => {
     onOpen();
     getContactId(id);
@@ -22,9 +21,9 @@ export default function ContactCard({ data, onOpen, getContactId, deleteContact 
         <div className="card-action">
           <FiEdit
             className="edit-profile"
-            onClick={() => onOpenEditHandler(data.id)}
+            onClick={() => onOpenEditHandler(data._id)}
           />
-          <AiFillDelete className="delete-profile" onClick={() => deleteContact(data.id)} />
+          <AiFillDelete className="delete-profile" onClick={() => deleteContact(data._id)} />
         </div>
       </div>
     </>

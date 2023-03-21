@@ -1,54 +1,78 @@
-
 import { useDisclosure } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlinePlusCircle, AiOutlineSearch } from "react-icons/ai";
 import AddContactForm from "./AddContactForm";
 import ContactCard from "./ContactCard";
 import EditModel from "./EditModel";
-import { v4 as uuidv4 } from 'uuid';
+import {
+  addContactOnServer,
+  deleteContactFromServer,
+  displayContactFromServer,
+  updateContactFronServer,
+} from "./network";
 
 export default function Frame() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen:isOpenEdit, onOpen: onOpenEdit, onClose: onCloseEdit } = useDisclosure();
-  const [contactData, setContact] = useState([
-    { id: 1, name: "Aman", email: "amangusain@gmail.com" },
-    { id: 2, name: "Rahul", email: "rahul@gmail.com" },
-    { id: 3, name: "Sachin", email: "Sachin@gmail.com" },
-    { id: 4, name: "Garv", email: "garv@gmail.com" },
-    { id: 5, name: "Nadeem", email: "nadeem@gmail.com" },
-  ]);
+  const {
+    isOpen: isOpenEdit,
+    onOpen: onOpenEdit,
+    onClose: onCloseEdit,
+  } = useDisclosure();
 
+  const [contactData, setContact] = useState([]);
+  const [Increment, setIncrement] = useState(0);
   const [selectContact, setSelectContact] = useState();
   const [searchData, setSearchData] = useState([]);
 
+  const fetchContacts = async () => {
+    const data = await displayContactFromServer();
+    setContact(data.data);
+  };
+  useEffect(() => {
+    fetchContacts();
+  }, [Increment]);
+
   console.log(contactData);
-  
-    const searchItem = contactData.filter(Element => (Element.name.includes(searchData)) )
 
+  const searchItem = contactData.filter((Element) =>
+    Element.name.includes(searchData)
+  );
 
-  const addContactArry = (name , email) => {
-    if((contactData.findIndex(value => value.email === email)) === -1 && email !== undefined)
-    {
-      console.log("heloo clalling", email);
-    setContact(prev => [...prev , { id : uuidv4(), name, email}])
+  const addContactArry = async (name, email) => {
+    if (
+      contactData.findIndex((value) => value.email === email) === -1 &&
+      email !== undefined
+    ) {
+      const data = await addContactOnServer(name, email);
+      console.log(data.data);
+
+      setContact((prev) => [...prev, { id: data.data._id, name, email }]);
     }
     onClose();
-  } 
+  };
 
-  const updateContact = (id, name , email) => {
-    setContact(prev => [...prev.filter(value => value.id !== id), {id , name , email}])
+  const updateContact = async (id, name, email) => {
+    const response = await updateContactFronServer(
+      { name: name, email: email },
+      id
+    );
+    setIncrement(Increment + 1);
+    // const data = await displayContactFromServer();
+    // setContact(data.data)
     onCloseEdit();
-  }
+  };
 
-  const deleteContact = (id) => {
-    setContact(prev => prev.filter(value => value.id !== id));
-  }
+  const deleteContact = async (id) => {
+    console.log(id, "deleteitem");
+    const response = await deleteContactFromServer(id);
+    setIncrement(Increment + 1);
+  };
 
   const getContactId = (id) => {
-    console.log(id);
-    const openContact = contactData.find(value => value.id === id);
+    console.log(id, "slected id");
+    const openContact = contactData.find((value) => value._id === id);
     setSelectContact(openContact);
-  } 
+  };
 
   return (
     <>
@@ -57,14 +81,22 @@ export default function Frame() {
         onClose={onClose}
         onOpen={onOpen}
         title={"Add Contact"}
-        Children={<AddContactForm button="Add Contact" addContact={addContactArry}/>}
+        Children={
+          <AddContactForm button="Add Contact" addContact={addContactArry} />
+        }
       />
       <EditModel
         isOpen={isOpenEdit}
         onClose={onCloseEdit}
         onOpen={onOpenEdit}
         title={"Update Contact"}
-        Children={<AddContactForm button='update' contactData={selectContact} updateContact={updateContact}/>}
+        Children={
+          <AddContactForm
+            button="update"
+            contactData={selectContact}
+            updateContact={updateContact}
+          />
+        }
       />
       <div className="wrapper">
         <div className="header">
@@ -77,16 +109,26 @@ export default function Frame() {
           </div>
           <div className="search-contact">
             <AiOutlineSearch className="search" />
-            <input type="text" placeholder="Search Contact..."  onChange={(e) => setSearchData(e.target.value)}/>
+            <input
+              type="text"
+              placeholder="Search Contact..."
+              onChange={(e) => setSearchData(e.target.value)}
+            />
           </div>
         </div>
         <hr />
         <div className="contact-box">
           {searchItem.map((data, i) => (
-            <ContactCard data={data} onOpen={onOpenEdit} key={data.id} getContactId={getContactId} deleteContact={deleteContact}/>
+            <ContactCard
+              data={data}
+              onOpen={onOpenEdit}
+              key={data.id}
+              getContactId={getContactId}
+              deleteContact={deleteContact}
+            />
           ))}
         </div>
       </div>
     </>
-  )
+  );
 }
