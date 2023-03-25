@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseUrl = "http://localhost:5000/contact";
+const baseUrl = "https://contact-manager-backend-gz5c.onrender.com/contact";
 export const addContactOnServer = async(name, email) => {
     try {
         const { data } = await axios.post(`${baseUrl}/create`, { name, email });
