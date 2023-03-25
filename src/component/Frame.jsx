@@ -52,7 +52,7 @@ export default function Frame() {
   };
 
   const updateContact = async (id, name, email) => {
-    const response = await updateContactFronServer(
+    await updateContactFronServer(
       { name: name, email: email },
       id
     );
@@ -64,7 +64,7 @@ export default function Frame() {
 
   const deleteContact = async (id) => {
     console.log(id, "deleteitem");
-    const response = await deleteContactFromServer(id);
+    await deleteContactFromServer(id);
     setIncrement(Increment + 1);
   };
 
